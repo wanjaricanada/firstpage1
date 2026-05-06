@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Bunyan Usman portfolio landing page with an interactive WebGL fluid simulation background."
+    />
+    <title>Bunyan Usman | Multidisciplinary Designer</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="hero" aria-labelledby="hero-title">
+      <canvas id="fluid-canvas" aria-hidden="true"></canvas>
+      <div class="grain" aria-hidden="true"></div>
+      <section class="hero__content">
+        <p class="hero__eyebrow">Multidisciplinary Designer</p>
+        <h1 id="hero-title">Bunyan Usman</h1>
+        <a class="hero__button" href="#portfolio" aria-label="Open Bunyan Usman's portfolio">
+          <span>Portfolio</span>
+          <span class="hero__button-arrow" aria-hidden="true">→</span>
+        </a>
+      </section>
+      <div class="scroll-pill" aria-hidden="true"></div>
+      <p class="credit">
+        Fluid engine inspired by
+        <a href="https://github.com/PavelDoGreat/WebGL-Fluid-Simulation" rel="noreferrer" target="_blank">
+          WebGL Fluid Simulation
+        </a>
+      </p>
+    </main>
+    <section id="portfolio" class="portfolio" aria-label="Portfolio placeholder">
+      <h2>Portfolio</h2>
+      <p>Selected work section ready for future projects.</p>
+    </section>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
