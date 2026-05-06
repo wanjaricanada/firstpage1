@@ -12,6 +12,29 @@ const settings = {
   fade: 0.16,
 };
 
+const fluidOptions = {
+  TRIGGER: 'hover',
+  IMMEDIATE: true,
+  AUTO: false,
+  SIM_RESOLUTION: 128,
+  DYE_RESOLUTION: 1024,
+  DENSITY_DISSIPATION: 1.35,
+  VELOCITY_DISSIPATION: 0.94,
+  PRESSURE: 0.72,
+  PRESSURE_ITERATIONS: 18,
+  CURL: 36,
+  SPLAT_RADIUS: 0.22,
+  SPLAT_FORCE: 6400,
+  SHADING: true,
+  COLORFUL: false,
+  BLOOM: false,
+  SUNRAYS: true,
+  SUNRAYS_WEIGHT: 0.42,
+  TRANSPARENT: false,
+  BACK_COLOR: { r: 0, g: 0, b: 0 },
+  PAUSED: false,
+};
+
 const palette = [
   { r: 255, g: 188, b: 68 },
   { r: 194, g: 112, b: 30 },
@@ -24,6 +47,11 @@ let usingFallback = false;
 
 function syncCssSettings() {
   document.documentElement.style.setProperty('--glow', settings.glow.toString());
+
+  fluidOptions.CURL = 20 + settings.motion * 16;
+  fluidOptions.SPLAT_FORCE = 5200 * settings.cursorForce;
+  fluidOptions.SPLAT_RADIUS = 0.14 + settings.cursorForce * 0.065;
+  fluidOptions.SUNRAYS_WEIGHT = 0.18 + settings.glow * 0.34;
 }
 
 function updateCursorPosition(clientX, clientY) {
@@ -61,27 +89,7 @@ function bindPanel() {
 async function bootWebGLFluid() {
   const { default: WebGLFluid } = await import('https://cdn.jsdelivr.net/npm/webgl-fluid@0.3/dist/webgl-fluid.mjs');
 
-  WebGLFluid(canvas, {
-    SIM_RESOLUTION: 128,
-    DYE_RESOLUTION: 1024,
-    DENSITY_DISSIPATION: 1.35,
-    VELOCITY_DISSIPATION: 0.94,
-    PRESSURE: 0.72,
-    PRESSURE_ITERATIONS: 18,
-    CURL: 36,
-    SPLAT_RADIUS: 0.22,
-    SPLAT_FORCE: 6400,
-    SHADING: true,
-    COLORFUL: false,
-    BLOOM: true,
-    BLOOM_INTENSITY: 0.58,
-    BLOOM_THRESHOLD: 0.18,
-    SUNRAYS: true,
-    SUNRAYS_WEIGHT: 0.42,
-    TRANSPARENT: false,
-    BACK_COLOR: { r: 0, g: 0, b: 0 },
-    PAUSED: false,
-  });
+  WebGLFluid(canvas, fluidOptions);
 
   seedSyntheticPointer();
 }
@@ -97,8 +105,8 @@ function seedSyntheticPointer() {
   points.forEach(([x, y], index) => {
     setTimeout(() => {
       canvas.dispatchEvent(new PointerEvent('pointermove', {
-        clientX: x,
-        clientY: y,
+        clientX: rect.left + x,
+        clientY: rect.top + y,
         bubbles: true,
         pointerId: 1,
         pointerType: 'mouse',
@@ -236,12 +244,31 @@ function bootFallbackCanvas() {
   draw();
 }
 
+function forwardPointerToWebGLCanvas(event) {
+  canvas.dispatchEvent(new PointerEvent(event.type, {
+    clientX: event.clientX,
+    clientY: event.clientY,
+    pressure: event.pressure,
+    pointerId: event.pointerId,
+    pointerType: event.pointerType,
+    buttons: event.buttons,
+    bubbles: false,
+  }));
+}
+
 function bindCursorGlow() {
   window.addEventListener('pointermove', (event) => {
     updateCursorPosition(event.clientX, event.clientY);
 
     if (!usingFallback) {
+      forwardPointerToWebGLCanvas(event);
       lastPointer = { x: event.clientX, y: event.clientY };
+    }
+  });
+
+  window.addEventListener('pointerdown', (event) => {
+    if (!usingFallback) {
+      forwardPointerToWebGLCanvas(event);
     }
   });
 }
